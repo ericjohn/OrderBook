@@ -3,6 +3,7 @@ import math
 from collections import deque # a faster insert/pop queue
 from six.moves import cStringIO as StringIO
 from decimal import Decimal
+import datetime
 
 from .ordertree import OrderTree
 
@@ -14,11 +15,11 @@ class OrderBook(object):
         self.last_tick = None
         self.last_timestamp = 0
         self.tick_size = tick_size
-        self.time = 0
+        self.time = datetime.datetime.utcnow()
         self.next_order_id = 0
 
     def update_time(self):
-        self.time += 1
+        self.time = datetime.datetime.utcnow()
 
     def process_order(self, quote, from_data, verbose):
         order_type = quote['type']
@@ -51,7 +52,7 @@ class OrderBook(object):
         while len(order_list) > 0 and quantity_to_trade > 0:
             head_order = order_list.get_head_order()
             traded_price = head_order.price
-            counter_party = head_order.trade_id
+            counter_party = head_order.order_id
             new_book_quantity = None
             if quantity_to_trade < head_order.quantity:
                 traded_quantity = quantity_to_trade
@@ -85,10 +86,10 @@ class OrderBook(object):
 
             if side == 'bid':
                 transaction_record['party1'] = [counter_party, 'bid', head_order.order_id, new_book_quantity]
-                transaction_record['party2'] = [quote['trade_id'], 'ask', None, None]
+                transaction_record['party2'] = [quote['order_id'], 'ask', None, None]
             else:
                 transaction_record['party1'] = [counter_party, 'ask', head_order.order_id, new_book_quantity]
-                transaction_record['party2'] = [quote['trade_id'], 'bid', None, None]
+                transaction_record['party2'] = [quote['order_id'], 'bid', None, None]
 
             self.tape.append(transaction_record)
             trades.append(transaction_record)
@@ -125,7 +126,7 @@ class OrderBook(object):
                 trades += new_trades
             # If volume remains, need to update the book with new quantity
             if quantity_to_trade > 0:
-                if not from_data:
+                if not quote['order_id']:
                     quote['order_id'] = self.next_order_id
                 quote['quantity'] = quantity_to_trade
                 self.bids.insert_order(quote)
@@ -137,7 +138,7 @@ class OrderBook(object):
                 trades += new_trades
             # If volume remains, need to update the book with new quantity
             if quantity_to_trade > 0:
-                if not from_data:
+                if not quote['order_id']:
                     quote['order_id'] = self.next_order_id
                 quote['quantity'] = quantity_to_trade
                 self.asks.insert_order(quote)

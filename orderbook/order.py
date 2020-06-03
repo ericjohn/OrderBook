@@ -9,11 +9,11 @@ class Order(object):
     existing Order.
     '''
     def __init__(self, quote, order_list):
-        self.timestamp = int(quote['timestamp']) # integer representing the timestamp of order creation
+        self.timestamp = quote['timestamp'] # integer representing the timestamp of order creation
         self.quantity = Decimal(quote['quantity']) # decimal representing amount of thing - can be partial amounts
         self.price = Decimal(quote['price']) # decimal representing price (currency)
-        self.order_id = int(quote['order_id'])
-        self.trade_id = quote['trade_id']
+        self.order_id = quote['order_id']
+        # self.trade_id = quote['trade_id']
         # doubly linked list to make it easier to re-order Orders for a particular price point
         self.next_order = None
         self.prev_order = None
@@ -36,4 +36,4 @@ class Order(object):
 
     def __str__(self):
         return "{}@{}/{} - {}".format(self.quantity, self.price,
-                                      self.trade_id, self.timestamp)
+                                      self.order_id, self.timestamp)

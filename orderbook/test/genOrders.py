@@ -137,7 +137,7 @@ prefill(10)
 # 1/ trade_id
 # 2/ choice('AMXC') : A (new), M (modify), X (cancel), C (cross)
 # 3/ choice('BS') : B (buy), S (sell)
-for trade_id in xrange(10, 100):
+for trade_id in range(10, 100):
     testCases(trade_id, choice('C'), choice('BS'), False)
 
 print(order_book)
